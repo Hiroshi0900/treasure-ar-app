@@ -5,6 +5,9 @@ class Position3D {
 
   Position3D(this.value);
 
+  Position3D.fromXYZ(double x, double y, double z)
+    : value = vector.Vector3(x, y, z);
+
   double get x => value.x;
   double get y => value.y;
   double get z => value.z;

@@ -19,11 +19,9 @@ class TreasureBox {
     return TreasureBox._(id: id, position: position, state: HiddenState());
   }
 
-  factory TreasureBox.create({
-    required Position3D position,
-  }) {
+  factory TreasureBox.create({required Position3D position}) {
     return TreasureBox._(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
       position: position,
       state: HiddenState(),
     );

@@ -67,9 +67,18 @@ void main() {
     });
 
     test('should retrieve all treasure boxes', () async {
-      final box1 = TreasureBox.hidden(id: 'box1', position: Position3D(Vector3(1, 0, 0)));
-      final box2 = TreasureBox.hidden(id: 'box2', position: Position3D(Vector3(2, 0, 0)));
-      final box3 = TreasureBox.hidden(id: 'box3', position: Position3D(Vector3(3, 0, 0)));
+      final box1 = TreasureBox.hidden(
+        id: 'box1',
+        position: Position3D(Vector3(1, 0, 0)),
+      );
+      final box2 = TreasureBox.hidden(
+        id: 'box2',
+        position: Position3D(Vector3(2, 0, 0)),
+      );
+      final box3 = TreasureBox.hidden(
+        id: 'box3',
+        position: Position3D(Vector3(3, 0, 0)),
+      );
 
       await repository.save(box1);
       await repository.save(box2);
@@ -143,8 +152,14 @@ void main() {
     });
 
     test('should delete all treasure boxes', () async {
-      final box1 = TreasureBox.hidden(id: 'del1', position: Position3D(Vector3(1, 0, 0)));
-      final box2 = TreasureBox.hidden(id: 'del2', position: Position3D(Vector3(2, 0, 0)));
+      final box1 = TreasureBox.hidden(
+        id: 'del1',
+        position: Position3D(Vector3(1, 0, 0)),
+      );
+      final box2 = TreasureBox.hidden(
+        id: 'del2',
+        position: Position3D(Vector3(2, 0, 0)),
+      );
 
       await repository.save(box1);
       await repository.save(box2);

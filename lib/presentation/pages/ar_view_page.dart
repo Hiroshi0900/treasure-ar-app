@@ -24,7 +24,7 @@ class _ARViewPageState extends State<ARViewPage> {
     arKitController = controller;
     arKitController?.onAddNodeForAnchor = _handleAddAnchor;
     arKitController?.onUpdateNodeForAnchor = _handleUpdateAnchor;
-    
+
     setState(() {
       isSessionReady = true;
     });
@@ -51,9 +51,7 @@ class _ARViewPageState extends State<ARViewPage> {
       height: planeAnchor.extent.z,
     );
 
-    final planeNode = ARKitNode(
-      geometry: planeGeometry,
-    );
+    final planeNode = ARKitNode(geometry: planeGeometry);
 
     arKitController?.add(planeNode, parentNodeName: planeAnchor.nodeName);
   }
@@ -63,9 +61,9 @@ class _ARViewPageState extends State<ARViewPage> {
   }
 
   void _placeTreasureBox() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('宝箱を配置しました！')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('宝箱を配置しました！')));
   }
 
   @override
