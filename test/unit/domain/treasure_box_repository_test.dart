@@ -49,24 +49,33 @@ void main() {
     });
 
     test('should save and retrieve a treasure box by id', () async {
+      // Given
       final treasureBox = TreasureBox.create(
         position: Position3D(Vector3(1, 2, 3)),
       );
 
+      // When
       await repository.save(treasureBox);
       final retrieved = await repository.findById(treasureBox.id);
 
+      // Then
       expect(retrieved, isNotNull);
       expect(retrieved!.id, equals(treasureBox.id));
       expect(retrieved.position, equals(treasureBox.position));
     });
 
     test('should return null when treasure box not found', () async {
+      // Given (no treasure boxes exist - using default empty state)
+      
+      // When
       final result = await repository.findById('non-existent-id');
+      
+      // Then
       expect(result, isNull);
     });
 
     test('should retrieve all treasure boxes', () async {
+      // Given
       final box1 = TreasureBox.hidden(
         id: 'box1',
         position: Position3D(Vector3(1, 0, 0)),
@@ -84,8 +93,10 @@ void main() {
       await repository.save(box2);
       await repository.save(box3);
 
+      // When
       final allBoxes = await repository.findAll();
 
+      // Then
       expect(allBoxes.length, equals(3));
       expect(
         allBoxes.map((b) => b.id),
@@ -94,6 +105,7 @@ void main() {
     });
 
     test('should find treasure boxes within a specific area', () async {
+      // Given
       final centerPosition = Position3D(Vector3(0, 0, 0));
 
       final nearBox1 = TreasureBox.hidden(
@@ -113,8 +125,10 @@ void main() {
       await repository.save(nearBox2);
       await repository.save(farBox);
 
+      // When
       final nearbyBoxes = await repository.findByArea(centerPosition, 2.0);
 
+      // Then
       expect(nearbyBoxes.length, equals(2));
       expect(
         nearbyBoxes.map((b) => b.id),
@@ -124,34 +138,41 @@ void main() {
     });
 
     test('should update existing treasure box', () async {
+      // Given
       final treasureBox = TreasureBox.create(
         position: Position3D(Vector3(1, 2, 3)),
       );
 
       await repository.save(treasureBox);
 
+      // When
       final foundBox = treasureBox.markAsFound();
       await repository.save(foundBox);
 
+      // Then
       final retrieved = await repository.findById(treasureBox.id);
-
       expect(retrieved, isNotNull);
       expect(retrieved!.isFound, isTrue);
     });
 
     test('should delete a treasure box by id', () async {
+      // Given
       final treasureBox = TreasureBox.create(
         position: Position3D(Vector3(1, 2, 3)),
       );
 
       await repository.save(treasureBox);
+      
+      // When
       await repository.delete(treasureBox.id);
 
+      // Then
       final result = await repository.findById(treasureBox.id);
       expect(result, isNull);
     });
 
     test('should delete all treasure boxes', () async {
+      // Given
       final box1 = TreasureBox.hidden(
         id: 'del1',
         position: Position3D(Vector3(1, 0, 0)),
@@ -164,16 +185,22 @@ void main() {
       await repository.save(box1);
       await repository.save(box2);
 
+      // When
       await repository.deleteAll();
 
+      // Then
       final allBoxes = await repository.findAll();
       expect(allBoxes, isEmpty);
     });
 
     test('should handle empty area search', () async {
+      // Given
       final centerPosition = Position3D(Vector3(0, 0, 0));
+      
+      // When
       final nearbyBoxes = await repository.findByArea(centerPosition, 1.0);
 
+      // Then
       expect(nearbyBoxes, isEmpty);
     });
   });

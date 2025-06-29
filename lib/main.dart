@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:treasure_ar_app/presentation/pages/ar_view_page.dart';
+import 'package:treasure_ar_app/presentation/providers/game_provider.dart';
+import 'package:treasure_ar_app/presentation/widgets/ar_controls.dart';
 
 void main() {
   runApp(const TreasureARApp());
@@ -10,13 +13,16 @@ class TreasureARApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'AR宝探しアプリ',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (context) => GameProvider(),
+      child: MaterialApp(
+        title: 'AR宝探しアプリ',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
@@ -27,7 +33,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber.shade50,
+      backgroundColor: Colors.blue.shade50,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -37,14 +43,14 @@ class HomePage extends StatelessWidget {
               Icon(
                 Icons.card_giftcard,
                 size: 100,
-                color: Colors.amber.shade700,
+                color: Colors.blue.shade700,
               ),
               const SizedBox(height: 24),
               Text(
                 'AR宝探し',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.amber.shade700,
+                  color: Colors.blue.shade700,
                 ),
               ),
               const SizedBox(height: 16),
@@ -66,8 +72,8 @@ class HomePage extends StatelessWidget {
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('ゲームを始める'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.blue.shade600,
+                  foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
@@ -77,12 +83,12 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: () {
-                  // TODO: 使い方ページを表示
+                  ARControls.showHelpDialog(context);
                 },
                 icon: const Icon(Icons.help_outline),
                 label: const Text('使い方'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.amber.shade700,
+                  foregroundColor: Colors.blue.shade700,
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),

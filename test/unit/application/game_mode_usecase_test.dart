@@ -98,22 +98,25 @@ void main() {
 
     group('initialize', () {
       test('should return last used mode when available', () async {
-        // Arrange
+        // Given
         final savedMode = GameMode.child();
         await mockRepository.saveMode(savedMode);
 
-        // Act
+        // When
         final mode = await useCase.initialize();
 
-        // Assert
+        // Then
         expect(mode.isChildMode, isTrue);
       });
 
       test('should return default adult mode when no saved mode', () async {
-        // Act
+        // Given
+        // No saved mode in repository
+
+        // When
         final mode = await useCase.initialize();
 
-        // Assert
+        // Then
         expect(mode.isAdultMode, isTrue);
         expect(mode.settings.treasureCount, equals(5));
       });
@@ -121,14 +124,14 @@ void main() {
 
     group('switchToChildMode', () {
       test('should switch from adult to child mode successfully', () async {
-        // Arrange
+        // Given
         final adultMode = GameMode.adult();
         await mockRepository.saveMode(adultMode);
 
-        // Act
+        // When
         final childMode = await useCase.switchToChildMode();
 
-        // Assert
+        // Then
         expect(childMode.isChildMode, isTrue);
         expect(childMode.settings.treasureCount, equals(3)); // Child-friendly
         expect(childMode.settings.discoveryRange, equals(2.0)); // Wider range
@@ -140,14 +143,14 @@ void main() {
       });
 
       test('should log mode change when switching to child mode', () async {
-        // Arrange
+        // Given
         final adultMode = GameMode.adult();
         await mockRepository.saveMode(adultMode);
 
-        // Act
+        // When
         await useCase.switchToChildMode();
 
-        // Assert
+        // Then
         expect(mockRepository._changeLogs, hasLength(1));
         final log = mockRepository._changeLogs.first;
         expect(log.fromMode.isAdultMode, isTrue);
@@ -156,14 +159,14 @@ void main() {
       });
 
       test('should return current mode if already in child mode', () async {
-        // Arrange
+        // Given
         final childMode = GameMode.child();
         await mockRepository.saveMode(childMode);
 
-        // Act
+        // When
         final result = await useCase.switchToChildMode();
 
-        // Assert
+        // Then
         expect(result.isChildMode, isTrue);
         expect(mockRepository._changeLogs, isEmpty); // No change logged
       });
@@ -171,7 +174,7 @@ void main() {
 
     group('switchToAdultMode', () {
       test('should switch from child to adult mode with long press', () async {
-        // Arrange
+        // Given
         final childMode = GameMode.child();
         await mockRepository.saveMode(childMode);
 
@@ -184,10 +187,10 @@ void main() {
         );
         await mockRepository.saveAdultSettings(originalAdultSettings);
 
-        // Act
+        // When
         final adultMode = await useCase.switchToAdultModeWithLongPress();
 
-        // Assert
+        // Then
         expect(adultMode.isAdultMode, isTrue);
         expect(
           adultMode.settings.treasureCount,
@@ -202,11 +205,11 @@ void main() {
       test(
         'should throw exception when trying to switch without long press',
         () async {
-          // Arrange
+          // Given
           final childMode = GameMode.child();
           await mockRepository.saveMode(childMode);
 
-          // Act & Assert
+          // When & Then
           expect(
             () => useCase.switchToAdultMode(),
             throwsA(isA<UnauthorizedModeSwitchException>()),
@@ -217,18 +220,18 @@ void main() {
       test(
         'should log child mode attempt when unauthorized switch is tried',
         () async {
-          // Arrange
+          // Given
           final childMode = GameMode.child();
           await mockRepository.saveMode(childMode);
 
-          // Act
+          // When
           try {
             await useCase.switchToAdultMode();
           } catch (e) {
             // Expected to throw
           }
 
-          // Assert
+          // Then
           expect(mockRepository._childAttempts, hasLength(1));
           final attempt = mockRepository._childAttempts.first;
           expect(attempt.attemptType, equals('unauthorized_mode_switch'));
@@ -236,14 +239,14 @@ void main() {
       );
 
       test('should use default adult settings if none saved', () async {
-        // Arrange
+        // Given
         final childMode = GameMode.child();
         await mockRepository.saveMode(childMode);
 
-        // Act
+        // When
         final adultMode = await useCase.switchToAdultModeWithLongPress();
 
-        // Assert
+        // Then
         expect(adultMode.isAdultMode, isTrue);
         expect(adultMode.settings.treasureCount, equals(5)); // Default
         expect(
@@ -255,7 +258,7 @@ void main() {
 
     group('updateSettings', () {
       test('should update settings in adult mode', () async {
-        // Arrange
+        // Given
         final adultMode = GameMode.adult();
         await mockRepository.saveMode(adultMode);
 
@@ -267,10 +270,10 @@ void main() {
           playSounds: true,
         );
 
-        // Act
+        // When
         final updatedMode = await useCase.updateSettings(newSettings);
 
-        // Assert
+        // Then
         expect(updatedMode.isAdultMode, isTrue);
         expect(updatedMode.settings.treasureCount, equals(8));
         expect(
@@ -282,7 +285,7 @@ void main() {
       test(
         'should throw exception when trying to update settings in child mode',
         () async {
-          // Arrange
+          // Given
           final childMode = GameMode.child();
           await mockRepository.saveMode(childMode);
 
@@ -294,7 +297,7 @@ void main() {
             playSounds: true,
           );
 
-          // Act & Assert
+          // When & Then
           expect(
             () => useCase.updateSettings(newSettings),
             throwsA(isA<UnauthorizedSettingsChangeException>()),
@@ -305,20 +308,20 @@ void main() {
       test(
         'should log child mode attempt when unauthorized settings change is tried',
         () async {
-          // Arrange
+          // Given
           final childMode = GameMode.child();
           await mockRepository.saveMode(childMode);
 
           final newSettings = GameSettings.defaultAdult();
 
-          // Act
+          // When
           try {
             await useCase.updateSettings(newSettings);
           } catch (e) {
             // Expected to throw
           }
 
-          // Assert
+          // Then
           expect(mockRepository._childAttempts, hasLength(1));
           expect(
             mockRepository._childAttempts.first.attemptType,
@@ -330,68 +333,70 @@ void main() {
 
     group('getCurrentMode', () {
       test('should return current mode from repository', () async {
-        // Arrange
+        // Given
         final mode = GameMode.child();
         await mockRepository.saveMode(mode);
 
-        // Act
+        // When
         final currentMode = await useCase.getCurrentMode();
 
-        // Assert
+        // Then
         expect(currentMode, isNotNull);
         expect(currentMode!.isChildMode, isTrue);
       });
 
       test('should return null when no current mode saved', () async {
-        // Act
+        // Given (no current mode saved - using default state)
+        
+        // When
         final currentMode = await useCase.getCurrentMode();
 
-        // Assert
+        // Then
         expect(currentMode, isNull);
       });
     });
 
     group('canAccessFeature', () {
       test('should allow access to settings in adult mode', () async {
-        // Arrange
+        // Given
         final adultMode = GameMode.adult();
         await mockRepository.saveMode(adultMode);
 
-        // Act
+        // When
         final canAccess = await useCase.canAccessFeature(GameFeature.settings);
 
-        // Assert
+        // Then
         expect(canAccess, isTrue);
       });
 
       test('should deny access to settings in child mode', () async {
-        // Arrange
+        // Given
         final childMode = GameMode.child();
         await mockRepository.saveMode(childMode);
 
-        // Act
+        // When
         final canAccess = await useCase.canAccessFeature(GameFeature.settings);
 
-        // Assert
+        // Then
         expect(canAccess, isFalse);
       });
 
       test('should allow play feature in both modes', () async {
-        // Arrange
+        // Given
         final adultMode = GameMode.adult();
         await mockRepository.saveMode(adultMode);
 
-        // Act
+        // When
         final adultCanPlay = await useCase.canAccessFeature(GameFeature.play);
 
-        // Arrange child mode
+        // Given child mode
         final childMode = GameMode.child();
         await mockRepository.saveMode(childMode);
 
-        // Act
+        // When
         final childCanPlay = await useCase.canAccessFeature(GameFeature.play);
 
-        // Assert
+        // Then
         expect(adultCanPlay, isTrue);
         expect(childCanPlay, isTrue);
       });
@@ -399,7 +404,7 @@ void main() {
 
     group('getChildModeSecurityReport', () {
       test('should return security report with recent attempts', () async {
-        // Arrange
+        // Given
         final now = DateTime.now();
         await mockRepository.logChildModeAttempt(
           attemptType: 'unauthorized_mode_switch',
@@ -410,19 +415,19 @@ void main() {
           timestamp: now.subtract(const Duration(minutes: 2)),
         );
 
-        // Act
+        // When
         final report = await useCase.getChildModeSecurityReport(
           period: const Duration(hours: 1),
         );
 
-        // Assert
+        // Then
         expect(report.totalAttempts, equals(2));
         expect(report.recentAttempts, hasLength(2));
         expect(report.isSecurityConcern, isFalse); // Below threshold
       });
 
       test('should identify security concern with many attempts', () async {
-        // Arrange
+        // Given
         final now = DateTime.now();
         for (int i = 0; i < 10; i++) {
           await mockRepository.logChildModeAttempt(
@@ -431,12 +436,12 @@ void main() {
           );
         }
 
-        // Act
+        // When
         final report = await useCase.getChildModeSecurityReport(
           period: const Duration(hours: 1),
         );
 
-        // Assert
+        // Then
         expect(report.totalAttempts, equals(10));
         expect(report.isSecurityConcern, isTrue); // Above threshold
       });
@@ -444,20 +449,20 @@ void main() {
 
     group('resetToDefaults', () {
       test('should reset to default adult mode', () async {
-        // Arrange
+        // Given
         final childMode = GameMode.child();
         await mockRepository.saveMode(childMode);
 
-        // Act
+        // When
         final defaultMode = await useCase.resetToDefaults();
 
-        // Assert
+        // Then
         expect(defaultMode.isAdultMode, isTrue);
         expect(defaultMode.settings.treasureCount, equals(5)); // Default
       });
 
       test('should clear all stored data when resetting', () async {
-        // Arrange
+        // Given
         await mockRepository.saveMode(GameMode.child());
         await mockRepository.saveAdultSettings(GameSettings.defaultAdult());
         await mockRepository.logChildModeAttempt(
@@ -465,10 +470,10 @@ void main() {
           timestamp: DateTime.now(),
         );
 
-        // Act
+        // When
         await useCase.resetToDefaults();
 
-        // Assert
+        // Then
         final currentMode = await mockRepository.getCurrentMode();
         final adultSettings = await mockRepository.getAdultSettings();
         final attempts = await mockRepository.getChildModeAttempts();

@@ -61,31 +61,42 @@ void main() {
     });
 
     test('should start AR session successfully', () async {
+      // Given (no specific setup needed - using default state)
+      
+      // When
       final session = await useCase.startSession();
 
+      // Then
       expect(session.isReady, isTrue);
       expect(session.state, isA<ReadyState>());
     });
 
     test('should get current session', () async {
+      // Given
       await useCase.startSession();
 
+      // When
       final currentSession = await useCase.getCurrentSession();
 
+      // Then
       expect(currentSession, isNotNull);
       expect(currentSession!.isReady, isTrue);
     });
 
     test('should stop session', () async {
+      // Given
       await useCase.startSession();
+      
+      // When
       await useCase.stopSession();
 
+      // Then
       final currentSession = await useCase.getCurrentSession();
-
       expect(currentSession, isNull);
     });
 
     test('should add plane to session', () async {
+      // Given
       await useCase.startSession();
 
       final plane = ARPlane(
@@ -95,13 +106,16 @@ void main() {
         type: PlaneType.horizontal,
       );
 
+      // When
       await useCase.addPlane(plane);
 
+      // Then
       final session = await useCase.getCurrentSession();
       expect(session!.detectedPlanes.length, equals(1));
     });
 
     test('should find suitable planes for treasure placement', () async {
+      // Given
       await useCase.startSession();
 
       final smallPlane = ARPlane(
@@ -129,26 +143,36 @@ void main() {
       await useCase.addPlane(largePlane);
       await useCase.addPlane(verticalPlane);
 
+      // When
       final suitablePlanes = await useCase.getSuitablePlanesForTreasure();
 
+      // Then
       expect(suitablePlanes.length, equals(1));
       expect(suitablePlanes.first.id, equals('large-plane'));
     });
 
     test('should check if session is ready for treasure placement', () async {
+      // Given (no session started initially)
+      
+      // When & Then (should not be ready without session)
       expect(await useCase.isReadyForTreasurePlacement(), isFalse);
 
+      // Given (session started but no planes)
       await useCase.startSession();
+      
+      // When & Then (should not be ready without suitable planes)
       expect(await useCase.isReadyForTreasurePlacement(), isFalse);
 
+      // Given (suitable plane added)
       final plane = ARPlane(
         id: 'plane-1',
         center: Vector3(0, 0, 0),
         extent: Vector3(1, 0, 1),
         type: PlaneType.horizontal,
       );
-
       await useCase.addPlane(plane);
+      
+      // When & Then (should be ready with suitable plane)
       expect(await useCase.isReadyForTreasurePlacement(), isTrue);
     });
   });

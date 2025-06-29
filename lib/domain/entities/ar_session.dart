@@ -58,6 +58,14 @@ class ARSession {
     );
   }
 
+  ARSession stop() {
+    return ARSession._(
+      id: id,
+      state: NotStartedState(),
+      detectedPlanes: [],
+    );
+  }
+
   ARSession addPlane(ARPlane plane) {
     if (!isReady) {
       throw InvalidStateException('Cannot add plane when session is not ready');

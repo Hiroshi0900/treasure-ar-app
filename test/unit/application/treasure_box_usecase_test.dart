@@ -55,13 +55,13 @@ void main() {
       test(
         'should create and save a new treasure box at given position',
         () async {
-          // Arrange
+          // Given
           final position = Position3D.fromXYZ(1.0, 0.0, 2.0);
 
-          // Act
+          // When
           final treasureBox = await useCase.placeTreasureBox(position);
 
-          // Assert
+          // Then
           expect(treasureBox.position, equals(position));
           expect(treasureBox.isHidden, isTrue);
           expect(treasureBox.id, isNotEmpty);
@@ -74,39 +74,41 @@ void main() {
       );
 
       test('should create treasure boxes with unique IDs', () async {
-        // Arrange
+        // Given
         final position1 = Position3D.fromXYZ(1.0, 0.0, 2.0);
         final position2 = Position3D.fromXYZ(2.0, 0.0, 3.0);
 
-        // Act
+        // When
         final box1 = await useCase.placeTreasureBox(position1);
         final box2 = await useCase.placeTreasureBox(position2);
 
-        // Assert
+        // Then
         expect(box1.id, isNot(equals(box2.id)));
       });
     });
 
     group('findTreasureBox', () {
       test('should return treasure box when found by ID', () async {
-        // Arrange
+        // Given
         final position = Position3D.fromXYZ(1.0, 0.0, 2.0);
         final originalBox = await useCase.placeTreasureBox(position);
 
-        // Act
+        // When
         final foundBox = await useCase.findTreasureBox(originalBox.id);
 
-        // Assert
+        // Then
         expect(foundBox, isNotNull);
         expect(foundBox!.id, equals(originalBox.id));
         expect(foundBox.position, equals(position));
       });
 
       test('should return null when treasure box not found', () async {
-        // Act
+        // Given (no treasure boxes exist - using default state)
+        
+        // When
         final foundBox = await useCase.findTreasureBox('non-existent-id');
 
-        // Assert
+        // Then
         expect(foundBox, isNull);
       });
     });
@@ -115,18 +117,18 @@ void main() {
       test(
         'should mark treasure box as found when within discovery range',
         () async {
-          // Arrange
+          // Given
           final treasurePosition = Position3D.fromXYZ(1.0, 0.0, 1.0);
           final playerPosition = Position3D.fromXYZ(1.0, 0.0, 1.5); // 0.5m away
           final treasureBox = await useCase.placeTreasureBox(treasurePosition);
 
-          // Act
+          // When
           final discoveredBox = await useCase.discoverTreasureBox(
             treasureBox.id,
             playerPosition,
           );
 
-          // Assert
+          // Then
           expect(discoveredBox, isNotNull);
           expect(discoveredBox!.isFound, isTrue);
           expect(discoveredBox.state, isA<FoundState>());
@@ -140,12 +142,12 @@ void main() {
       test(
         'should throw exception when treasure box is too far away',
         () async {
-          // Arrange
+          // Given
           final treasurePosition = Position3D.fromXYZ(1.0, 0.0, 1.0);
           final playerPosition = Position3D.fromXYZ(1.0, 0.0, 5.0); // 4.0m away
           final treasureBox = await useCase.placeTreasureBox(treasurePosition);
 
-          // Act & Assert
+          // When & Then
           expect(
             () => useCase.discoverTreasureBox(treasureBox.id, playerPosition),
             throwsA(isA<TreasureBoxTooFarException>()),
@@ -154,10 +156,10 @@ void main() {
       );
 
       test('should throw exception when treasure box does not exist', () async {
-        // Arrange
+        // Given
         final playerPosition = Position3D.fromXYZ(1.0, 0.0, 1.0);
 
-        // Act & Assert
+        // When & Then
         expect(
           () => useCase.discoverTreasureBox('non-existent-id', playerPosition),
           throwsA(isA<TreasureBoxNotFoundException>()),
@@ -167,7 +169,7 @@ void main() {
       test(
         'should throw exception when treasure box is already found',
         () async {
-          // Arrange
+          // Given
           final treasurePosition = Position3D.fromXYZ(1.0, 0.0, 1.0);
           final playerPosition = Position3D.fromXYZ(1.0, 0.0, 1.1);
           final treasureBox = await useCase.placeTreasureBox(treasurePosition);
@@ -175,7 +177,7 @@ void main() {
           // First discovery
           await useCase.discoverTreasureBox(treasureBox.id, playerPosition);
 
-          // Act & Assert
+          // When & Then
           expect(
             () => useCase.discoverTreasureBox(treasureBox.id, playerPosition),
             throwsA(isA<InvalidStateTransitionException>()),
@@ -186,16 +188,16 @@ void main() {
 
     group('openTreasureBox', () {
       test('should open treasure box when it is found', () async {
-        // Arrange
+        // Given
         final treasurePosition = Position3D.fromXYZ(1.0, 0.0, 1.0);
         final playerPosition = Position3D.fromXYZ(1.0, 0.0, 1.1);
         final treasureBox = await useCase.placeTreasureBox(treasurePosition);
         await useCase.discoverTreasureBox(treasureBox.id, playerPosition);
 
-        // Act
+        // When
         final openedBox = await useCase.openTreasureBox(treasureBox.id);
 
-        // Assert
+        // Then
         expect(openedBox, isNotNull);
         expect(openedBox!.isOpened, isTrue);
         expect(openedBox.state, isA<OpenedState>());
@@ -206,7 +208,9 @@ void main() {
       });
 
       test('should throw exception when treasure box does not exist', () async {
-        // Act & Assert
+        // Given (no treasure boxes exist - using default state)
+        
+        // When & Then
         expect(
           () => useCase.openTreasureBox('non-existent-id'),
           throwsA(isA<TreasureBoxNotFoundException>()),
@@ -216,11 +220,11 @@ void main() {
       test(
         'should throw exception when treasure box is not found yet',
         () async {
-          // Arrange
+          // Given
           final treasurePosition = Position3D.fromXYZ(1.0, 0.0, 1.0);
           final treasureBox = await useCase.placeTreasureBox(treasurePosition);
 
-          // Act & Assert
+          // When & Then
           expect(
             () => useCase.openTreasureBox(treasureBox.id),
             throwsA(isA<InvalidStateTransitionException>()),
@@ -231,7 +235,7 @@ void main() {
 
     group('getTreasureBoxesInArea', () {
       test('should return treasure boxes within specified radius', () async {
-        // Arrange
+        // Given
         final center = Position3D.fromXYZ(0.0, 0.0, 0.0);
         final radius = 2.0;
 
@@ -246,13 +250,13 @@ void main() {
           Position3D.fromXYZ(0.0, 0.0, 3.0),
         ); // 3.0m away (outside)
 
-        // Act
+        // When
         final treasuresInArea = await useCase.getTreasureBoxesInArea(
           center,
           radius,
         );
 
-        // Assert
+        // Then
         expect(treasuresInArea, hasLength(2));
         for (final treasure in treasuresInArea) {
           expect(
@@ -263,57 +267,59 @@ void main() {
       });
 
       test('should return empty list when no treasure boxes in area', () async {
-        // Arrange
+        // Given
         final center = Position3D.fromXYZ(0.0, 0.0, 0.0);
         final radius = 1.0;
 
         // Place treasure box outside radius
         await useCase.placeTreasureBox(Position3D.fromXYZ(5.0, 0.0, 0.0));
 
-        // Act
+        // When
         final treasuresInArea = await useCase.getTreasureBoxesInArea(
           center,
           radius,
         );
 
-        // Assert
+        // Then
         expect(treasuresInArea, isEmpty);
       });
     });
 
     group('getAllTreasureBoxes', () {
       test('should return all placed treasure boxes', () async {
-        // Arrange
+        // Given
         await useCase.placeTreasureBox(Position3D.fromXYZ(1.0, 0.0, 1.0));
         await useCase.placeTreasureBox(Position3D.fromXYZ(2.0, 0.0, 2.0));
         await useCase.placeTreasureBox(Position3D.fromXYZ(3.0, 0.0, 3.0));
 
-        // Act
+        // When
         final allTreasures = await useCase.getAllTreasureBoxes();
 
-        // Assert
+        // Then
         expect(allTreasures, hasLength(3));
       });
 
       test('should return empty list when no treasure boxes exist', () async {
-        // Act
+        // Given (no treasure boxes exist - using default state)
+        
+        // When
         final allTreasures = await useCase.getAllTreasureBoxes();
 
-        // Assert
+        // Then
         expect(allTreasures, isEmpty);
       });
     });
 
     group('removeAllTreasureBoxes', () {
       test('should remove all treasure boxes', () async {
-        // Arrange
+        // Given
         await useCase.placeTreasureBox(Position3D.fromXYZ(1.0, 0.0, 1.0));
         await useCase.placeTreasureBox(Position3D.fromXYZ(2.0, 0.0, 2.0));
 
-        // Act
+        // When
         await useCase.removeAllTreasureBoxes();
 
-        // Assert
+        // Then
         final allTreasures = await useCase.getAllTreasureBoxes();
         expect(allTreasures, isEmpty);
       });
@@ -321,7 +327,7 @@ void main() {
 
     group('getHiddenTreasureBoxes', () {
       test('should return only hidden treasure boxes', () async {
-        // Arrange
+        // Given
         final position1 = Position3D.fromXYZ(1.0, 0.0, 1.0);
         final position2 = Position3D.fromXYZ(2.0, 0.0, 2.0);
         final position3 = Position3D.fromXYZ(3.0, 0.0, 3.0);
@@ -339,10 +345,10 @@ void main() {
         );
         await useCase.openTreasureBox(box2.id);
 
-        // Act
+        // When
         final hiddenBoxes = await useCase.getHiddenTreasureBoxes();
 
-        // Assert
+        // Then
         expect(hiddenBoxes, hasLength(1));
         expect(hiddenBoxes.first.isHidden, isTrue);
       });
